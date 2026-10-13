@@ -1,0 +1,22 @@
+.hotel-navbar {
+    background-color: #344c5c;
+    padding: 18px 0;
+    box-shadow: 0px 3px 12px rgba(0, 0, 0, 0.15);
+}
+
+.hotel-navbar .navbar-brand {
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    color: #f3d6a4;
+}
+
+.hotel-navbar .nav-link {
+    font-size: 1rem;
+    margin-left: 18px;
+    color: #ffffff;
+    transition: color 0.3s ease;
+}
+
+.hotel-navbar .nav-link:hover {
+    color: #f3d6a4;
+}

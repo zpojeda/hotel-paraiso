@@ -1,0 +1,37 @@
+#habitaciones .card {
+    
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.3s ;
+}
+
+#habitaciones .card-img-top {
+    height: 230px;
+    object-fit: cover;
+}
+
+#habitaciones .card-body {
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+    
+}
+
+#habitaciones .card:hover {
+    transform: translate(-6px);
+}
+
+#habitaciones .btn{
+    background-color: #344c5c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    align-self: flex-start;
+    margin-top: auto;
+    
+}
+
+#habitaciones .btn:hover {
+    background-color: #243743;
+ }
