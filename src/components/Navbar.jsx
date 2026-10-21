@@ -1,6 +1,6 @@
 import './Navbar.css'
 
-function Navbar() {
+function Navbar({ abrirLogin }) {
 
     return(
         <nav className="navbar navbar-expand-lg bg-dark navbar-dark hotel-navbar">
@@ -34,6 +34,14 @@ function Navbar() {
                             <a href="#" className="nav-link">Contacto</a>
                         </li>
                     </ul>
+                    <button
+                    type="button"
+                    className="btn ms-lg-3"
+                    style={{ backgroundColor: "#f3d6a4", color: "#344c5c" }}
+                    onClick={abrirLogin}
+                    >
+                    Iniciar sesión
+                    </button>
                     </div> 
 
             </div>
