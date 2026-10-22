@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Swal from 'sweetalert2'
+import Sidebar from '../../components/Sidebar'
 import './Dashboard.css'
 
 const reservas = [
@@ -29,32 +30,14 @@ function Dashboard({ onLogout }) {
 }
   return (
     <div className="hp-dashboard">
-      <aside className="hp-sidebar">
-        <div className="hp-brand">
-          <span className="hp-brand-icon">✦</span>
-          <div><strong>Hotel Paraíso</strong><small>Administración</small></div>
-        </div>
-        <nav className="hp-menu" aria-label="Menú de administración">
-          {secciones.map((item) => (
-            <button
-              key={item}
-              type="button"
-              className={`hp-menu-item ${seccion === item ? 'active' : ''}`}
-              onClick={() => setSeccion(item)}
-            >
-              <span aria-hidden="true">{({ Resumen: '▦', Habitaciones: '▤', Reservas: '▣', Huéspedes: '♙' })[item]}</span>
-              {item}
-            </button>
-          ))}
-        </nav>
-        <button
-          className="hp-logout"
-          type="button"
-          onClick={confirmarSalida}
-        >
-          ↪ Cerrar sesión
-        </button>
-      </aside>
+      
+      <Sidebar
+        titulo='Administración'
+        opciones={secciones}
+        seccion={seccion}
+        cambiarSeccion={setSeccion}
+        cerrarSesion={confirmarSalida}
+      />
 
       <main className="hp-main">
         <header className="hp-header">
