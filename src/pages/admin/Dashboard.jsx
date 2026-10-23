@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState , useEffect } from 'react'
 import Swal from 'sweetalert2'
 import Sidebar from '../../components/Sidebar'
 import './Dashboard.css'
+import TablaReservas from '../../components/TablaReservas'
 
 const reservas = [
   { id: 'R-001', huesped: 'Laura Gómez', habitacion: 'Suite 201', fecha: '18/10/2026', estado: 'Confirmada' },
@@ -13,7 +14,23 @@ const secciones = ['Resumen', 'Habitaciones', 'Reservas', 'Huéspedes']
 
 function Dashboard({ onLogout }) {
   const [seccion, setSeccion] = useState('Resumen')
+
+  const [reservasClientes , setReservasClientes ] =useState([])
+  useEffect(() =>{
+    const guardadas = localStorage.getItem("reservasHotel")
+    setReservasClientes(guardadas ? JSON.parse(guardadas) : [])
+  }, [])
+
+    const confirmadas = reservasClientes.filter(
+    reserva => reserva.estado === "Confirmada"
+  ).length
+
+  const pendientes = reservasClientes.filter(
+    reserva => reserva.estado === "Pendiente"
+  ).length
+
   const confirmarSalida =() =>{
+   
     Swal.fire({
       title:"¿Deseas cerrar Sesión?",
       text: "Regresaras a la pagina principal",
@@ -44,7 +61,7 @@ function Dashboard({ onLogout }) {
           <div>
             <p className="hp-eyebrow">PANEL ADMINISTRATIVO</p>
             <h1>{seccion === 'Resumen' ? 'Bienvenido al Hotel Paraíso' : seccion}</h1>
-            <p className="hp-subtitle">{seccion === 'Resumen' ? 'Resumen general de la operación del hotel' : 'Módulo en preparación para las próximas clases'}</p>
+            <p className="hp-subtitle">{seccion === 'Resumen' ? 'Resumen general de la operación del hotel' : 'Consulta y Gestión de Reservas del Hotel '}</p>
           </div>
           <div className="hp-user"><span className="hp-avatar">A</span><span>Administrador</span></div>
         </header>
@@ -54,7 +71,9 @@ function Dashboard({ onLogout }) {
             <section className="hp-stats" aria-label="Indicadores del hotel">
               {[
                 { titulo: 'Habitaciones', valor: '24', detalle: 'Total registradas', icono: '▤' },
-                { titulo: 'Reservas', valor: '18', detalle: 'Reservas activas', icono: '▣' },
+                { titulo: 'Reservas', valor: reservasClientes.length, detalle: 'Reservas activas', icono: '▣' },
+                { titulo: 'Confirmadas', valor: confirmadas, detalle :'Reservas confirmadas', icono: '☑️' },
+                { titulo: 'Pendientes', valor: pendientes, detalle :'Reservas pendientes', icono: '⏳' },
                 { titulo: 'Huéspedes', valor: '42', detalle: 'Huéspedes registrados', icono: '♙' },
                 { titulo: 'Ocupación', valor: '75%', detalle: 'Ocupación estimada', icono: '◕' },
               ].map((dato) => (
@@ -78,12 +97,30 @@ function Dashboard({ onLogout }) {
                         <td><span className={`hp-status ${reserva.estado === 'Confirmada' ? 'confirmed' : 'pending'}`}>{reserva.estado}</span></td>
                       </tr>
                     ))}
+
+                   {reservasClientes.map((reserva) => (
+                   <tr key={`cliente-${reserva.id}`}>
+                    <td>{reserva.id}</td>
+                    <td>Cliente</td>
+                    <td>{reserva.habitacion}</td>
+                    <td>{reserva.entrada}</td>
+                    <td>
+                     <span className={`hp-status ${reserva.estado === "Confirmada" ? "confirmed" : "pending"}`}>
+                      {reserva.estado}
+                     </span>
+                    </td>
+                    </tr>
+                   ) )}           
+
                   </tbody>
                 </table>
               </div>
             </section>
           </>
-        ) : (
+        ) : seccion === "Reservas" ? (
+          <TablaReservas />
+
+        ): (
           <section className="hp-panel hp-placeholder">
             <span className="hp-placeholder-icon">✦</span>
             <h2>Gestión de {seccion.toLowerCase()}</h2>

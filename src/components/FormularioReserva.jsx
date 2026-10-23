@@ -4,7 +4,8 @@ function FormularioReserva({ reserva, guardar, cancelar }){
     const [ datos , setDatos] = useState({
         habitacion:"",
         entrada: "",
-        salida: ""
+        salida: "",
+        estado:"Pendiente"
     })
 
     useEffect(()=> {
@@ -12,15 +13,23 @@ function FormularioReserva({ reserva, guardar, cancelar }){
             setDatos({
                 habitacion: reserva.habitacion,
                 entrada: reserva.entrada,
-                salida: reserva.salida
+                salida: reserva.salida,
+                estado:reserva.estado
             })
         }else {
-            setDatos({ habitacion:"", entrada: "", salida:""})
+            setDatos({ habitacion:"", entrada: "", salida:"", estado:"Pendiente"})
         }
 
     }, [reserva])
 
     const manejarCambio = (e) => {
+    setDatos({
+        ...datos,
+        [e.target.name]: e.target.value
+    })
+}
+
+    const manejarEnvio = (e) => {
         e.preventDefault()
         if (!datos.habitacion || !datos.entrada  || !datos.salida){
             Swal.fire("Completa todos los satos")
@@ -40,7 +49,7 @@ function FormularioReserva({ reserva, guardar, cancelar }){
     }
 
     return (
-        <form onSubmit={manejarCambio}>
+        <form onSubmit={manejarEnvio}>
             <div className="mb-3">
                 <label className="form-label">Habitación</label>
                 <select 
@@ -80,6 +89,22 @@ function FormularioReserva({ reserva, guardar, cancelar }){
                 onChange={manejarCambio}
                 required
                  />
+
+                <div className="mb-3">
+                    <label htmlFor="" className="form-label">Estado</label>
+                    <select 
+                    className="form-select"
+                    name="estado"
+                    value={datos.estado}
+                    onChange={manejarCambio}
+                    required >
+
+                <option value="Pendiente">Pendiente</option>
+                <option value="Confirmada">Confirmada</option>
+                <option value="Cancelada">Cancelada</option>
+                    </select>
+                    
+                    </div> 
               </div>  
                 <div className="d-flex justify-content-end gap-2">
                     <button

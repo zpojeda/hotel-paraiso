@@ -1,6 +1,6 @@
 import FormularioReserva from "./FormularioReserva"
 import Swal from "sweetalert2"
-import { useState } from "react"
+import { useState , useEffect } from "react"
 import DataTable from "react-data-table-component"
 import { createRoot } from "react-dom/client"
 const reservasIniciales = [
@@ -20,29 +20,68 @@ const reservasIniciales = [
     }
 ]
 function TablaReservas() {
-    const [reservas, setReservas] = useState(reservasIniciales)
+    const [reservas, setReservas] = useState(() =>{
+        const guardadas = localStorage.getItem("reservasHotel")
+        return guardadas ? JSON.parse(guardadas) : reservasIniciales
+    })
+    
     const [busqueda, setBusqueda] = useState("")
-    const abrirFormulario = async () => {
+    const abrirFormulario = async (reserva = null) => {
         const contenedor = document.createElement("div")
         const raiz = createRoot(contenedor)
 
         raiz.render(
             <FormularioReserva
-            reserva={null}
+            reserva={reserva}
             guardar={(datos) => {
-                console.log("Nueva reserva:" , datos)
+                if (reserva){ 
+                    setReservas(actuales =>
+                        actuales.map(r =>
+                            r.id === reserva.id ? {...r, ...datos} : r
+                        )
+                    )
+
+                }else {
+                const nuevaReserva = {
+                    id: Math.max(0, ...reservas.map(r => r.id)) + 1,
+                   ...datos,
+                }
+                setReservas(actuales => [...actuales, nuevaReserva])
+            }
                 Swal.close()
             }}
             cancelar={() => Swal.close()}
             />
         )
         await Swal.fire({
-            title: "Nueva Reserva",
+            title: reserva ? "Editar Reserva" : "Nueva Reserva",
             html:contenedor,
             showConfirmButton: false,
             didClose: () => raiz.unmount()
         })
     }
+useEffect(() => {
+    localStorage.setItem("reservasHotel" , JSON.stringify(reservas))
+}, [reservas]) 
+
+    const eliminarReserva = async (id) => {
+        const resultado = await Swal.fire({
+            title:" Eliminar reserva ?",
+            text:"Esta accion eliminara la reserva", 
+            icon:"warning",
+            showCancelButton: true, 
+            confirmButtonText: "Si, eliminar", 
+            confirmButtonColor: "#dc3545"
+        })
+
+        if (resultado.isConfirmed){
+            setReservas(actuales => 
+                actuales.filter(reserva => reserva.id !== id )
+
+            )
+            Swal.fire("Reserva eliminada", )
+        }
+    }    
 
     const columnas = [
         {
@@ -77,14 +116,14 @@ function TablaReservas() {
                     <button
                         className="btn btn-sm btn-outline-primary"
                         title="Editar"
-                        onClick={() => alert(`Editar Reserva ${fila.id}`)}
+                        onClick={() => abrirFormulario(fila)}
                     >
                         <i className="bi bi-pencil-square"></i>
                     </button>
                     <button
                         className="btn btn-sm btn-outline-danger"
                         title="Eliminar"
-                        onClick={() => alert(`Eliminar Reserva ${fila.id}`)}
+                        onClick={() => eliminarReserva(fila.id)}
                     >
                         <i className="bi bi-trash"></i>
                     </button>
@@ -93,6 +132,8 @@ function TablaReservas() {
         }
 
     ]
+
+
 
     const reservasFiltradas = reservas.filter(reserva =>
         reserva.habitacion.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -113,7 +154,7 @@ function TablaReservas() {
              <button
              className="btn text-white"
              style={{ backgroundColor:"#344c5c" }}
-             onClick={abrirFormulario}
+             onClick={() => abrirFormulario()}
              
              >   
              <i className="bi bi-plus-circle me-2"></i>
