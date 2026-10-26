@@ -3,6 +3,7 @@ import Swal from 'sweetalert2'
 import Sidebar from '../../components/Sidebar'
 import './Dashboard.css'
 import TablaReservas from '../../components/TablaReservas'
+import TablaHabitaciones from '../../components/TablaHabitaciones'
 
 const reservas = [
   { id: 'R-001', huesped: 'Laura Gómez', habitacion: 'Suite 201', fecha: '18/10/2026', estado: 'Confirmada' },
@@ -72,7 +73,7 @@ function Dashboard({ onLogout }) {
               {[
                 { titulo: 'Habitaciones', valor: '24', detalle: 'Total registradas', icono: '▤' },
                 { titulo: 'Reservas', valor: reservasClientes.length, detalle: 'Reservas activas', icono: '▣' },
-                { titulo: 'Confirmadas', valor: confirmadas, detalle :'Reservas confirmadas', icono: '☑️' },
+                { titulo: 'Confirmadas', valor: confirmadas, detalle :'Reservas confirmadas', icono: '✔️' },
                 { titulo: 'Pendientes', valor: pendientes, detalle :'Reservas pendientes', icono: '⏳' },
                 { titulo: 'Huéspedes', valor: '42', detalle: 'Huéspedes registrados', icono: '♙' },
                 { titulo: 'Ocupación', valor: '75%', detalle: 'Ocupación estimada', icono: '◕' },
@@ -117,6 +118,9 @@ function Dashboard({ onLogout }) {
               </div>
             </section>
           </>
+        ): seccion === "Habitaciones" ? (
+          <TablaHabitaciones />
+
         ) : seccion === "Reservas" ? (
           <TablaReservas />
 

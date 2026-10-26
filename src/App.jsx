@@ -6,15 +6,20 @@ import ClienteDashboard from "./pages/cliente/ClienteDashboard"
 import ProtectedRoute from "./components/ProtectedRoute"
 
 function App() {
-  const [usuario, setUsuario] = useState(null)
+  const [usuario, setUsuario] = useState(() => {
+    return localStorage.getItem("usuarioHotel")
+  })
+
   const navigate = useNavigate()
   
   const iniciarSesion = (rol) => {
     setUsuario(rol)
+    localStorage.setItem("usuarioHotel", rol)
     navigate(rol === "admin" ? "/admin" : "/cliente")
   }
   const cerrarSesion = () => {
     setUsuario(null)
+    localStorage.removeItem("usuarioHotel")
     navigate("/")
   }
   return (
