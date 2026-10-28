@@ -6,7 +6,12 @@ function ProtectedRoute({ usuario ,  rolPermitido, children }){
     }
 
     if (usuario !== rolPermitido){
-        return <Navigate to={usuario === "admin" ? "/admin" : "/cliente"} replace />
+        const rutasPorRol = {
+            admin: "/admin",
+            cliente: "/cliente",
+            empleado: "/empleado"
+        }
+        return <Navigate to={rutasPorRol[usuario] || "/"} replace />
     }
 
     return children

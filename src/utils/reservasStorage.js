@@ -16,6 +16,10 @@ function leerReservasGuardadas() {
     return reservas;
 }
 
+export function obtenerReservas() {
+    return leerReservasGuardadas();
+}
+
 function obtenerSiguienteNumero(reservas) {
     const siguienteGuardado = Number.parseInt(
         localStorage.getItem(claveConsecutivo) || "1",

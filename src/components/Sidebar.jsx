@@ -11,6 +11,9 @@ function Sidebar({
         Habitaciones: "bi-door-open",
         Reservas: "bi-calendar-check",
         Huéspedes: "bi-person-circle",
+        Empleados: "bi-people",
+        Tareas: "bi-list-check",
+        "Mis tareas": "bi-clipboard-check",
         "Mis reservas": "bi-calendar2-date",
         "Mi perfil": "bi-person-badge"
     }
