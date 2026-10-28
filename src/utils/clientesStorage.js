@@ -78,6 +78,7 @@ export function registrarCliente({ nombre, correo, telefono, password }) {
         id,
         correo: correoNormalizado,
         password,
+        activo: true,
         perfil: {
             ...perfilVacio,
             nombre: nombre.trim(),
@@ -91,10 +92,16 @@ export function registrarCliente({ nombre, correo, telefono, password }) {
 
 export function autenticarCliente(correo, password) {
     const correoNormalizado = normalizarCorreo(correo);
-    return obtenerClientes().find(cliente =>
+    const cliente = obtenerClientes().find(cliente =>
         normalizarCorreo(cliente.correo) === correoNormalizado &&
         cliente.password === password
     ) ?? null;
+
+    if (cliente?.activo === false) {
+        throw new Error("Esta cuenta está inactiva. Contacta al hotel para recibir ayuda.");
+    }
+
+    return cliente;
 }
 
 export function obtenerClientePorId(clienteId) {
@@ -111,6 +118,30 @@ export function actualizarPerfilCliente(clienteId, perfil) {
 
         actualizado = true;
         return { ...cliente, perfil: normalizarPerfil(perfil) };
+    });
+
+    if (!actualizado) {
+        throw new Error("No se encontró la cuenta de cliente que se intenta actualizar.");
+    }
+
+    localStorage.setItem(claveClientes, JSON.stringify(clientesActualizados));
+    return clientesActualizados.find(cliente => cliente.id === clienteId);
+}
+
+export function actualizarEstadoCliente(clienteId, activo) {
+    if (typeof activo !== "boolean") {
+        throw new Error("El estado del huésped debe ser activo o inactivo.");
+    }
+
+    const clientes = obtenerClientes();
+    let actualizado = false;
+    const clientesActualizados = clientes.map(cliente => {
+        if (cliente.id !== clienteId) {
+            return cliente;
+        }
+
+        actualizado = true;
+        return { ...cliente, activo };
     });
 
     if (!actualizado) {

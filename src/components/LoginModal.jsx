@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { autenticarCliente, registrarCliente } from "../utils/clientesStorage";
+import { autenticarEmpleado } from "../utils/empleadosStorage";
 
 function LoginModal({ mostrar, cerrar, onLogin }) {
   const [modo, setModo] = useState("login");
@@ -31,6 +32,21 @@ function LoginModal({ mostrar, cerrar, onLogin }) {
     }
 
     try {
+      const empleado = autenticarEmpleado(correo, password);
+      if (empleado) {
+        Swal.fire({
+          icon: "success",
+          title: `¡Bienvenido, ${empleado.nombre}!`,
+          text: "Sesión iniciada correctamente",
+          confirmButtonText: "Continuar",
+          confirmButtonColor: "#344c5c"
+        }).then(() => {
+          cerrar()
+          onLogin("empleado", empleado.id)
+        })
+        return
+      }
+
       const cliente = autenticarCliente(correo, password);
       if (!cliente) {
         throw new Error("El correo o la contraseña son incorrectos.");

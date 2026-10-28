@@ -3,7 +3,7 @@ import Swal from "sweetalert2"
 import { useState , useEffect } from "react"
 import DataTable from "react-data-table-component"
 import { createRoot } from "react-dom/client"
-import { obtenerClientes } from "../utils/clientesStorage"
+import { obtenerClientePorId, obtenerClientes } from "../utils/clientesStorage"
 import { generarCodigoReserva } from "../utils/reservasStorage"
 import { formatearPrecioHabitacion, obtenerHabitaciones } from "../utils/habitacionesStorage"
 const reservasIniciales = [
@@ -31,6 +31,29 @@ function TablaReservas({ clienteId, esAdmin = false }) {
     const [busqueda, setBusqueda] = useState("")
 
     const abrirFormulario = async (reserva = null) => {
+        if (!esAdmin) {
+            try {
+                const cliente = obtenerClientePorId(clienteId)
+                if (!cliente || cliente.activo === false) {
+                    await Swal.fire({
+                        icon: "warning",
+                        title: "Cuenta inactiva",
+                        text: "No puedes realizar reservas con una cuenta inactiva. Contacta al hotel para recibir ayuda.",
+                        confirmButtonColor: "#344c5c"
+                    })
+                    return
+                }
+            } catch (error) {
+                await Swal.fire({
+                    icon: "error",
+                    title: "No se pudo validar la cuenta",
+                    text: error.message || "Intenta nuevamente más tarde.",
+                    confirmButtonColor: "#344c5c"
+                })
+                return
+            }
+        }
+
         let habitaciones;
         try {
             habitaciones = obtenerHabitaciones();
@@ -56,6 +79,29 @@ function TablaReservas({ clienteId, esAdmin = false }) {
             habitaciones={habitaciones}
             reservas={reservas}
             guardar={(datos) => {
+                if (!esAdmin) {
+                    try {
+                        const cliente = obtenerClientePorId(clienteId)
+                        if (!cliente || cliente.activo === false) {
+                            Swal.fire({
+                                icon: "warning",
+                                title: "Cuenta inactiva",
+                                text: "No puedes realizar reservas con una cuenta inactiva. Contacta al hotel para recibir ayuda.",
+                                confirmButtonColor: "#344c5c"
+                            })
+                            return
+                        }
+                    } catch (error) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "No se pudo validar la cuenta",
+                            text: error.message || "Intenta nuevamente más tarde.",
+                            confirmButtonColor: "#344c5c"
+                        })
+                        return
+                    }
+                }
+
                 if (reserva){ 
                     setReservas(actuales =>
                         actuales.map(r =>

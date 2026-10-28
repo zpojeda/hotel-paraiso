@@ -3,34 +3,40 @@ import { Routes, Route, useNavigate } from "react-router-dom"
 import Home from "./pages/Home"
 import Dashboard from "./pages/admin/Dashboard"
 import ClienteDashboard from "./pages/cliente/ClienteDashboard"
+import EmpleadoDashboard from "./pages/empleado/EmpleadoDashboard"
 import ProtectedRoute from "./components/ProtectedRoute"
 
 function App() {
   const [usuario, setUsuario] = useState(() => {
     return localStorage.getItem("usuarioHotel")
   })
-  const [clienteId, setClienteId] = useState(() => {
+  const [usuarioId, setUsuarioId] = useState(() => {
     return localStorage.getItem("usuarioHotelId") ||
       (localStorage.getItem("usuarioHotel") === "cliente" ? "cliente-demo" : null)
   })
 
   const navigate = useNavigate()
   
-  const iniciarSesion = (rol, nuevoClienteId = null) => {
+  const iniciarSesion = (rol, nuevoUsuarioId = null) => {
     setUsuario(rol)
     localStorage.setItem("usuarioHotel", rol)
-    if (rol === "cliente" && nuevoClienteId) {
-      setClienteId(nuevoClienteId)
-      localStorage.setItem("usuarioHotelId", nuevoClienteId)
+    if ((rol === "cliente" || rol === "empleado") && nuevoUsuarioId) {
+      setUsuarioId(nuevoUsuarioId)
+      localStorage.setItem("usuarioHotelId", nuevoUsuarioId)
     } else {
-      setClienteId(null)
+      setUsuarioId(null)
       localStorage.removeItem("usuarioHotelId")
     }
-    navigate(rol === "admin" ? "/admin" : "/cliente")
+    const rutasPorRol = {
+      admin: "/admin",
+      cliente: "/cliente",
+      empleado: "/empleado"
+    }
+    navigate(rutasPorRol[rol] || "/")
   }
   const cerrarSesion = () => {
     setUsuario(null)
-    setClienteId(null)
+    setUsuarioId(null)
     localStorage.removeItem("usuarioHotel")
     localStorage.removeItem("usuarioHotelId")
     navigate("/")
@@ -55,10 +61,19 @@ function App() {
         path="/cliente"
         element={
           <ProtectedRoute usuario={usuario} rolPermitido="cliente">
-            <ClienteDashboard clienteId={clienteId} onLogout={cerrarSesion} />
+            <ClienteDashboard clienteId={usuarioId} onLogout={cerrarSesion} />
 
           </ProtectedRoute>
         }
+        />
+
+        <Route
+          path="/empleado"
+          element={
+            <ProtectedRoute usuario={usuario} rolPermitido="empleado">
+              <EmpleadoDashboard empleadoId={usuarioId} onLogout={cerrarSesion} />
+            </ProtectedRoute>
+          }
         />
          
     
