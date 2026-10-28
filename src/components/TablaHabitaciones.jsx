@@ -3,37 +3,11 @@ import FormularioHabitacion from "./FormularioHabitacion"
 import Swal from "sweetalert2"
 
 import DataTable from "react-data-table-component"
-
-const habitacionesIniciales =[
-    {
-        id:1,
-        nombre:"Habitación Estandar",
-        precio:150000,
-        estado:"Disponible"
-
-    }, 
-    {
-        id:2,
-        nombre:"Habitación Premiun",
-        precio:250000,
-        estado:"Disponible"
-
-    },
-    {
-        id:3,
-        nombre:"Habitación Suite",
-        precio:500000,
-        estado:"Mantenimiento"
-
-    }
-]
+import { formatearPrecioHabitacion, obtenerHabitaciones } from "../utils/habitacionesStorage"
 
 
 function TablaHabitaciones() {
-    const [habitaciones, setHabitaciones] = useState(() => {
-        const guardadas = localStorage.getItem("habitacionesHotel")
-        return guardadas ? JSON.parse(guardadas) : habitacionesIniciales
-    })
+    const [habitaciones, setHabitaciones] = useState(obtenerHabitaciones)
     const [mostrarFormulario , setMostrarFormulario] = useState(false)
     const [habitacionEditando, setHabitacionEditando] = useState(null)
     
@@ -120,9 +94,14 @@ function TablaHabitaciones() {
             sortable:true
         }, 
         {
+            name:"Tipo",
+            selector:fila => fila.tipo,
+            sortable:true
+        },
+        {
             name:"Precio",
             selector:fila => fila.precio,
-            format: fila => `$${fila.precio.toLocaleString('es-CO')}`, 
+            format: fila => formatearPrecioHabitacion(fila.precio),
             sortable:true
         },
         {
@@ -197,14 +176,20 @@ function TablaHabitaciones() {
             <p className="text-secondary"> Consulta y Administración de habitaciones </p>
         
             <div className="mt-4">
-
-                  <input 
-                  type="text"
-                  className="form-control mb-3"
-                  placeholder="Buscar por habitacion nombre o estado"
-                  value={busqueda}
-                  onChange={(e) => setBusqueda(e.target.value)}
-                  />  
+                <div className="d-flex justify-content-end mb-3">
+                    <div className="input-group w-100" style={{ maxWidth: "400px" }}>
+                        <span className="input-group-text">
+                            <i className="bi bi-search" aria-hidden="true"></i>
+                        </span>
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Buscar por habitacion nombre o estado"
+                            value={busqueda}
+                            onChange={(e) => setBusqueda(e.target.value)}
+                        />
+                    </div>
+                </div>
 
                 <DataTable  
                 columns={columnas}

@@ -3,6 +3,9 @@ import Swal from "sweetalert2"
 import { useState , useEffect } from "react"
 import DataTable from "react-data-table-component"
 import { createRoot } from "react-dom/client"
+import { obtenerClientes } from "../utils/clientesStorage"
+import { generarCodigoReserva } from "../utils/reservasStorage"
+import { formatearPrecioHabitacion, obtenerHabitaciones } from "../utils/habitacionesStorage"
 const reservasIniciales = [
     {
         id: 1,
@@ -19,31 +22,52 @@ const reservasIniciales = [
         estado: "Pendiente"
     }
 ]
-function TablaReservas() {
+function TablaReservas({ clienteId, esAdmin = false }) {
     const [reservas, setReservas] = useState(() =>{
         const guardadas = localStorage.getItem("reservasHotel")
         return guardadas ? JSON.parse(guardadas) : reservasIniciales
     })
-    
+    const [clientes] = useState(() => esAdmin ? obtenerClientes() : [])
     const [busqueda, setBusqueda] = useState("")
+
     const abrirFormulario = async (reserva = null) => {
+        let habitaciones;
+        try {
+            habitaciones = obtenerHabitaciones();
+        } catch (error) {
+            await Swal.fire({
+                icon: "error",
+                title: "No se pudieron cargar las habitaciones",
+                text: error.message,
+                confirmButtonColor: "#344c5c"
+            });
+            return;
+        }
+
         const contenedor = document.createElement("div")
         const raiz = createRoot(contenedor)
 
         raiz.render(
             <FormularioReserva
             reserva={reserva}
+            clienteId={clienteId}
+            esAdmin={esAdmin}
+            clientes={clientes}
+            habitaciones={habitaciones}
+            reservas={reservas}
             guardar={(datos) => {
                 if (reserva){ 
                     setReservas(actuales =>
                         actuales.map(r =>
-                            r.id === reserva.id ? {...r, ...datos} : r
+                            r.id === reserva.id
+                                ? { ...r, ...datos, clienteId: esAdmin ? datos.clienteId : r.clienteId }
+                                : r
                         )
                     )
 
                 }else {
                 const nuevaReserva = {
-                    id: Math.max(0, ...reservas.map(r => r.id)) + 1,
+                    id: generarCodigoReserva(reservas),
                    ...datos,
                 }
                 setReservas(actuales => [...actuales, nuevaReserva])
@@ -60,9 +84,9 @@ function TablaReservas() {
             didClose: () => raiz.unmount()
         })
     }
-useEffect(() => {
-    localStorage.setItem("reservasHotel" , JSON.stringify(reservas))
-}, [reservas]) 
+    useEffect(() => {
+        localStorage.setItem("reservasHotel", JSON.stringify(reservas))
+    }, [reservas])
 
     const eliminarReserva = async (id) => {
         const resultado = await Swal.fire({
@@ -94,6 +118,29 @@ useEffect(() => {
             selector: fila => fila.habitacion,
             sortable: true
         },
+        {
+            name: "Tipo",
+            selector: fila => fila.habitacionTipo || "—",
+            sortable: true
+        },
+        {
+            name: "Precio",
+            selector: fila => fila.habitacionPrecio ?? "",
+            format: fila => fila.habitacionPrecio == null
+                ? "—"
+                : formatearPrecioHabitacion(fila.habitacionPrecio),
+            sortable: true
+        },
+        ...(esAdmin ? [{
+            name: "Cliente",
+            selector: fila => {
+                const cliente = clientes.find(item => item.id === fila.clienteId);
+                return cliente
+                    ? cliente.perfil?.nombre || cliente.correo
+                    : "Sin asignar";
+            },
+            sortable: true
+        }] : []),
         {
             name: "Entrada",
             selector: fila => fila.entrada,
@@ -135,7 +182,10 @@ useEffect(() => {
 
 
 
-    const reservasFiltradas = reservas.filter(reserva =>
+    const reservasPropias = esAdmin
+        ? reservas
+        : reservas.filter(reserva => reserva.clienteId === clienteId);
+    const reservasFiltradas = reservasPropias.filter(reserva =>
         reserva.habitacion.toLowerCase().includes(busqueda.toLowerCase()) ||
         reserva.estado.toLowerCase().includes(busqueda.toLowerCase())
     )
@@ -158,7 +208,7 @@ useEffect(() => {
              
              >   
              <i className="bi bi-plus-circle me-2"></i>
-             Nueva Reserva
+             {esAdmin ? "Nueva Reserva" : "Reservar habitación"}
             </button>
               </div>
             <DataTable 
@@ -167,7 +217,9 @@ useEffect(() => {
             pagination
             highlightOnHover
             responsive
-            noDataComponent="No se encontraro reservas"
+            noDataComponent={esAdmin
+                ? "No se encontraron reservas"
+                : "Aún no tienes reservas. Crea una para verla aquí."}
             />
           </div> 
     )

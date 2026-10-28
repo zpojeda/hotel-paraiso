@@ -1,8 +1,12 @@
 import { useState } from "react"
+import { inferirTipoHabitacion } from "../utils/habitacionesStorage"
 
 function FormularioHabitacion({ habitacion, guardar, cancelar }) {
     const [formulario, setFormulario] = useState({
         nombre: habitacion?.nombre ?? "",
+        tipo: habitacion?.tipo ?? (
+            habitacion ? inferirTipoHabitacion(habitacion.nombre) : "Estándar"
+        ),
         precio: habitacion?.precio ?? "",
         estado: habitacion?.estado ?? "Disponible"
     })
@@ -32,6 +36,22 @@ function FormularioHabitacion({ habitacion, guardar, cancelar }) {
                     onChange={manejarCambio}
                     required
                 />
+            </div>
+
+            <div className="mb-3">
+                <label className="form-label">Tipo de habitación</label>
+                <select
+                    className="form-select"
+                    name="tipo"
+                    value={formulario.tipo}
+                    onChange={manejarCambio}
+                    required
+                >
+                    <option value="Estándar">Estándar</option>
+                    <option value="Premium">Premium</option>
+                    <option value="Suite">Suite</option>
+                    <option value="Otra">Otra</option>
+                </select>
             </div>
 
             <div className="mb-3">

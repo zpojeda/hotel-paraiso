@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom"
+import { Routes, Route, useNavigate } from "react-router-dom"
 import Home from "./pages/Home"
 import Dashboard from "./pages/admin/Dashboard"
 import ClienteDashboard from "./pages/cliente/ClienteDashboard"
@@ -9,17 +9,30 @@ function App() {
   const [usuario, setUsuario] = useState(() => {
     return localStorage.getItem("usuarioHotel")
   })
+  const [clienteId, setClienteId] = useState(() => {
+    return localStorage.getItem("usuarioHotelId") ||
+      (localStorage.getItem("usuarioHotel") === "cliente" ? "cliente-demo" : null)
+  })
 
   const navigate = useNavigate()
   
-  const iniciarSesion = (rol) => {
+  const iniciarSesion = (rol, nuevoClienteId = null) => {
     setUsuario(rol)
     localStorage.setItem("usuarioHotel", rol)
+    if (rol === "cliente" && nuevoClienteId) {
+      setClienteId(nuevoClienteId)
+      localStorage.setItem("usuarioHotelId", nuevoClienteId)
+    } else {
+      setClienteId(null)
+      localStorage.removeItem("usuarioHotelId")
+    }
     navigate(rol === "admin" ? "/admin" : "/cliente")
   }
   const cerrarSesion = () => {
     setUsuario(null)
+    setClienteId(null)
     localStorage.removeItem("usuarioHotel")
+    localStorage.removeItem("usuarioHotelId")
     navigate("/")
   }
   return (
@@ -42,7 +55,7 @@ function App() {
         path="/cliente"
         element={
           <ProtectedRoute usuario={usuario} rolPermitido="cliente">
-            <ClienteDashboard onLogout={cerrarSesion} />
+            <ClienteDashboard clienteId={clienteId} onLogout={cerrarSesion} />
 
           </ProtectedRoute>
         }

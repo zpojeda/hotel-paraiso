@@ -1,9 +1,10 @@
-import { useState , useEffect } from 'react'
+import { useState } from 'react'
 import Swal from 'sweetalert2'
 import Sidebar from '../../components/Sidebar'
 import './Dashboard.css'
 import TablaReservas from '../../components/TablaReservas'
 import TablaHabitaciones from '../../components/TablaHabitaciones'
+import { obtenerClientes } from '../../utils/clientesStorage'
 
 const reservas = [
   { id: 'R-001', huesped: 'Laura Gómez', habitacion: 'Suite 201', fecha: '18/10/2026', estado: 'Confirmada' },
@@ -16,11 +17,11 @@ const secciones = ['Resumen', 'Habitaciones', 'Reservas', 'Huéspedes']
 function Dashboard({ onLogout }) {
   const [seccion, setSeccion] = useState('Resumen')
 
-  const [reservasClientes , setReservasClientes ] =useState([])
-  useEffect(() =>{
+  const [reservasClientes] = useState(() =>{
     const guardadas = localStorage.getItem("reservasHotel")
-    setReservasClientes(guardadas ? JSON.parse(guardadas) : [])
-  }, [])
+    return guardadas ? JSON.parse(guardadas) : []
+  })
+  const [clientes] = useState(() => obtenerClientes())
 
     const confirmadas = reservasClientes.filter(
     reserva => reserva.estado === "Confirmada"
@@ -102,7 +103,11 @@ function Dashboard({ onLogout }) {
                    {reservasClientes.map((reserva) => (
                    <tr key={`cliente-${reserva.id}`}>
                     <td>{reserva.id}</td>
-                    <td>Cliente</td>
+                    <td>
+                      {clientes.find(cliente => cliente.id === reserva.clienteId)?.perfil?.nombre ||
+                        clientes.find(cliente => cliente.id === reserva.clienteId)?.correo ||
+                        "Sin asignar"}
+                    </td>
                     <td>{reserva.habitacion}</td>
                     <td>{reserva.entrada}</td>
                     <td>
@@ -122,7 +127,7 @@ function Dashboard({ onLogout }) {
           <TablaHabitaciones />
 
         ) : seccion === "Reservas" ? (
-          <TablaReservas />
+          <TablaReservas esAdmin />
 
         ): (
           <section className="hp-panel hp-placeholder">

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import TablaReservas from "../../components/TablaReservas";
+import PerfilCliente from "../../components/PerfilCliente";
 import "../admin/Dashboard.css"
 
-function ClienteDashboard({ onLogout }){
+function ClienteDashboard({ clienteId, onLogout }){
     const [seccion, setSeccion] = useState("Mis reservas")
     const opciones =["Mis reservas", "Mi perfil"]
 
@@ -34,7 +35,8 @@ return (
             }
             </p>
         </div>
-        {seccion === "Mis reservas" && <TablaReservas />}
+        {seccion === "Mis reservas" && <TablaReservas clienteId={clienteId} />}
+        {seccion === "Mi perfil" && <PerfilCliente key={clienteId} clienteId={clienteId} />}
     </section>
 </main>
 
